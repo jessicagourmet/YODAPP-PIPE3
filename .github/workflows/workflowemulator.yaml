@@ -1,0 +1,32 @@
+name: Testes Mobile com Robot Framework
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  android-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Android Emulator
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot
+          script: |
+            python -m pip install --upgrade pip
+            pip install robotframework robotframework-appiumlibrary Appium-Python-Client
+            robot -d results tests/
+
+      - name: Upload resultados
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-results
+          path: results

@@ -1,0 +1,104 @@
+name: Testes Mobile com Robot
+
+on:
+  push:
+    branches: 
+      - master
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  robot-tests:
+    runs-on: self-hosted
+
+    steps:
+      - name: Fazer checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar dependências do sistema
+        run: |
+          sudo apt-get update
+          sudo apt install openjdk-17-jdk -y
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Instalar bibliotecas Python
+        run: |
+          pip install -U pip
+          pip install robotframework
+          pip install robotframework-appiumlibrary
+          pip install Appium-Python-Client
+          pip install robotframework-pythonlibcore
+
+      - name: Instalar Node.js e Appium
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.17.0'
+      - run: npm install -g appium
+
+      - name: Instalar dependências Android SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk
+          
+          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+          unzip cmdline-tools.zip -d cmdline-tools 
+          mv cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/emulator:$PATH" >> $GITHUB_ENV
+          
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+              "platform-tools" \
+              "platforms;android-30" \
+              "build-tools;30.0.3" \
+              "emulator" \
+              "system-images;android-30;google_apis;x86_64"
+          $HOME/android-sdk/emulator/emulator -list-avds
+
+
+      - name: Criar AVD
+        run: |
+            echo "no" | avdmanager create avd \
+            -n test \
+            -k "system-images;android-30;google_apis;x86_64" \
+            --abi x86_64 \
+            --device "pixel"
+
+      - name: Listar AVDs
+        run: avdmanager  list avd
+
+      - name: Iniciar emulador
+        run: |
+          export ANDROID_AVD_HOME=/home/runner/.config/.android/avd
+          $HOME/android-sdk/emulator/emulator -avd test -no-window -no-audio -no-boot-anim &
+          adb wait-for-device
+          booted=""
+          until [[ "$booted" == "1" ]]; do
+            booted=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            sleep 2
+          done
+          echo "Emulador pronto!"
+
+      - name: Iniciar Appium
+        run: |
+          npx appium --log appium.log &
+          echo "Aguardando o Appium iniciar..."
+          for i in {1..15}; do
+            if curl -s http://localhost:4723/wd/hub/status | grep -q "status"; then
+              echo "Appium está rodando!"
+              break
+            fi
+            echo "Esperando Appium... ($i/15)"
+            sleep 2
+          done
+
+      - name: Executar testes Robot Framework
+        run: robot --timestampoutputs -d results tests/home.robot
