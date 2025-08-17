@@ -3,6 +3,7 @@ name: Testes Mobile com Robot
 on:
   push:
     branches: 
+      - main
       - master
   pull_request:
     branches: 
