@@ -20,7 +20,7 @@ jobs:
           sudo apt install openjdk-17-jdk -y
 
       - name: Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@d4c3f7e9b8a7f6e2c3b2a1d0e9f8c7b6a5d4c3f7
         with:
           python-version: '3.11'
 
