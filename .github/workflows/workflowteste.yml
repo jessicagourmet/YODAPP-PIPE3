@@ -33,7 +33,7 @@ jobs:
           pip install robotframework-pythonlibcore
 
       - name: Instalar Node.js e Appium
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@d4c3f7e9b8a7f6e2c3b2a1d0e9f8c7b6a5d4c3f7
         with:
           node-version: '22.17.0'
       - run: npm install -g appium
