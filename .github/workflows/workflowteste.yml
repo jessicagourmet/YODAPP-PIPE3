@@ -20,7 +20,7 @@ jobs:
           sudo apt install openjdk-17-jdk -y
 
       - name: Configurar Python
-        uses: actions/setup-python@XhWP72ibEMYNJG4XY6CjHwDKNA7w4sI2Lv/3954jNPg
+        uses: actions/setup-python@AAAAC3NzaC1lZDI1NTE5AAAAICqr7eGS+Qc6khxa6v4F9mQONzrk3aLmmzUbW5mfJiEt
         with:
           python-version: '3.11'
 
@@ -33,7 +33,7 @@ jobs:
           pip install robotframework-pythonlibcore
 
       - name: Instalar Node.js e Appium
-        uses: actions/setup-node@XhWP72ibEMYNJG4XY6CjHwDKNA7w4sI2Lv/3954jNPg
+        uses: actions/setup-node@AAAAC3NzaC1lZDI1NTE5AAAAICqr7eGS+Qc6khxa6v4F9mQONzrk3aLmmzUbW5mfJiEt
         with:
           node-version: '22.17.0'
       - run: npm install -g appium
