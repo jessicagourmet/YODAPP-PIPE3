@@ -25,7 +25,7 @@ jobs:
           done
           echo "Emulador pronto!"
 
-      - name: Iniciar Appium
+      - name: Iniciar Appiu
         run: |
           npx appium --log appium.log &
           echo "Aguardando o Appium iniciar..."
